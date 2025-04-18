@@ -1,0 +1,21 @@
+(version 20231231)
+
+(install
+ (run
+  sh
+  -exc
+  "PATH=%{prefix}/init_deps/bin/:$PATH %{prefix}/init_deps/bin/dune install --prefix %{prefix}/init_deps/ -p menhirLib -j %{jobs}"))
+
+(build
+ (run
+  sh
+  -exc
+  "PATH=%{prefix}/init_deps/bin/:$PATH %{prefix}/init_deps/bin/dune build @install -j %{jobs}"))
+
+(depends init-compiler init-dune)
+
+(source
+ (fetch
+  (url
+   https://gitlab.inria.fr/fpottier/menhir/-/archive/20231231/archive.tar.gz)
+  (checksum md5=799748bc3b7a542798a85956c7863865)))

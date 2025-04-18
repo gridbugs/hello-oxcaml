@@ -1,0 +1,8 @@
+(lang dune 3.17)
+
+(repository
+ (name jst)
+ (url git+https://github.com/janestreet/opam-repository#with-extensions))
+
+(lock_dir
+ (repositories upstream overlay jst))
