@@ -1,23 +1,51 @@
 (version 5.2.0+flambda2)
 
 (install
- (run sh -exc "PATH=%{prefix}/init_deps/bin/:$PATH make install"))
+ (run sh -exc "PATH=%{build}/init_deps/bin/:$PATH make install"))
 
 (build
  (progn
   (patch meta.patch)
   (patch remove-sigwait.patch)
+  (run tar -xf init-compiler.tar.gz)
+  (run tar -xf init-dune.tbz)
+  (run tar -xf init-menhir.tar.gz)
+  (run
+   sh
+   -exc
+   "cd ocaml-4.14.1 && ./configure --prefix %{build}/init_deps --disable-ocamldoc")
+  (run sh -exc "make -C ocaml-4.14.1 -j%{jobs}")
+  (run sh -exc "make -C ocaml-4.14.1 install")
+  (run
+   sh
+   -exc
+   "cd dune-3.9.3; PATH=%{build}/init_deps/bin/:$PATH ocaml boot/bootstrap.ml -j %{jobs}")
+  (run
+   sh
+   -exc
+   "cd dune-3.9.3; PATH=%{build}/init_deps/bin/:$PATH ./_boot/dune.exe build dune.install --release --profile dune-bootstrap -j %{jobs}")
+  (run
+   sh
+   -exc
+   "cd dune-3.9.3; PATH=%{build}/init_deps/bin/:$PATH ./_boot/dune.exe install --root %{build}/dune-3.9.3 --prefix %{build}/init_deps/ dune")
+  (run
+   sh
+   -exc
+   "cd menhir-20231231-d3d815e4f554da68b8c247241c8f8678926eecaa; PATH=%{build}/init_deps/bin/:$PATH %{build}/init_deps/bin/dune build --root %{build}/menhir-20231231-d3d815e4f554da68b8c247241c8f8678926eecaa @install -j %{jobs}")
+  (run
+   sh
+   -exc
+   "cd menhir-20231231-d3d815e4f554da68b8c247241c8f8678926eecaa; PATH=%{build}/init_deps/bin/:$PATH %{build}/init_deps/bin/dune install --prefix %{build}/init_deps/ -p menhirLib -j %{jobs}")
   (run autoconf)
   (run
-   ./configure
-   --enable-runtime5
-   --enable-middle-end=flambda2
-   --disable-naked-pointers
-   --prefix=%{prefix}
-   --with-dune=%{prefix}/init_deps/bin/dune)
-  (run sh -exc "PATH=%{prefix}/init_deps/bin/:$PATH make -j%{jobs}")))
-
-(depends init-compiler init-dune init-menhir)
+   sh
+   -exc
+   "echo '(dirs :standard \\ init_deps dune-3.9.3 menhir-20231231-d3d815e4f554da68b8c247241c8f8678926eecaa ocaml-4.14.1)' >> dune")
+  (run
+   sh
+   -exc
+   "PATH=%{build}/init_deps/bin/:$PATH ./configure --enable-runtime5 --enable-middle-end=flambda2 --disable-naked-pointers '--prefix=%{prefix}' '--with-dune=%{build}/init_deps/bin/dune'")
+  (run sh -exc "PATH=%{build}/init_deps/bin/:$PATH make -j%{jobs}")))
 
 (source
  (fetch
@@ -28,3 +56,20 @@
 
 (exported_env
  (= CAML_LD_LIBRARY_PATH "\%{lib}%/stublibs"))
+
+(extra_sources
+ (init-compiler.tar.gz
+  (fetch
+   (url https://github.com/ocaml/ocaml/archive/4.14.1.tar.gz)
+   (checksum
+    sha256=776006e6f0b9bcfb6d9d74381c588e587432ca85562fde93bb80472a5145b028)))
+ (init-dune.tbz
+  (fetch
+   (url https://github.com/ocaml/dune/releases/download/3.9.3/dune-3.9.3.tbz)
+   (checksum
+    sha256=96bf755da267fb46e4af2dda0db56d5863761589618089c429ff85e0f7f65783)))
+ (init-menhir.tar.gz
+  (fetch
+   (url
+    https://gitlab.inria.fr/fpottier/menhir/-/archive/20231231/archive.tar.gz)
+   (checksum md5=799748bc3b7a542798a85956c7863865))))
