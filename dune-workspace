@@ -2,7 +2,7 @@
 
 (repository
  (name jst)
- (url git+https://github.com/dra27/opam-repository#with-extensions-dp))
+ (url git+https://github.com/janestreet/opam-repository#with-extensions))
 
 (lock_dir
  (repositories upstream overlay jst))

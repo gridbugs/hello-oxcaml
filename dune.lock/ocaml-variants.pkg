@@ -5,17 +5,16 @@
 
 (build
  (progn
-  (patch meta.patch)
-  (patch remove-sigwait.patch)
+  (patch ignore-opam.patch)
   (run tar -xf init-compiler.tar.gz)
   (run tar -xf init-dune.tbz)
   (run tar -xf init-menhir.tar.gz)
   (run
    sh
    -exc
-   "cd ocaml-4.14.1 && ./configure --prefix %{build}/init_deps --disable-ocamldoc")
-  (run sh -exc "make -C ocaml-4.14.1 -j%{jobs}")
-  (run sh -exc "make -C ocaml-4.14.1 install")
+   "cd ocaml-4.14.2 && ./configure --prefix %{build}/init_deps --disable-ocamldoc")
+  (run sh -exc "make -C ocaml-4.14.2 -j%{jobs}")
+  (run sh -exc "make -C ocaml-4.14.2 install")
   (run
    sh
    -exc
@@ -36,23 +35,19 @@
    sh
    -exc
    "cd menhir-20231231-d3d815e4f554da68b8c247241c8f8678926eecaa; PATH=%{build}/init_deps/bin/:$PATH %{build}/init_deps/bin/dune install --prefix %{build}/init_deps/ -p menhirLib -j %{jobs}")
-  (run autoconf)
+  (run sh -exc "autoconf || autoconf27")
   (run
    sh
    -exc
-   "echo '(dirs :standard \\ init_deps dune-3.9.3 menhir-20231231-d3d815e4f554da68b8c247241c8f8678926eecaa ocaml-4.14.1)' >> dune")
-  (run
-   sh
-   -exc
-   "PATH=%{build}/init_deps/bin/:$PATH ./configure --enable-runtime5 --enable-middle-end=flambda2 --disable-naked-pointers '--prefix=%{prefix}' '--with-dune=%{build}/init_deps/bin/dune'")
+   "PATH=%{build}/init_deps/bin/:$PATH ./configure --enable-runtime5 --enable-middle-end=flambda2 --enable-poll-insertion --disable-naked-pointers '--prefix=%{prefix}' '--with-dune=%{build}/init_deps/bin/dune'")
   (run sh -exc "PATH=%{build}/init_deps/bin/:$PATH make -j%{jobs}")))
 
 (source
  (fetch
   (url
-   https://github.com/ocaml-flambda/flambda-backend/archive/refs/tags/5.2.0minus-2.tar.gz)
+   https://github.com/ocaml-flambda/flambda-backend/archive/refs/tags/5.2.0minus-9.tar.gz)
   (checksum
-   sha256=fea242bf6707991bcd6de388a247aaf966e4936098a7db170560b3e879436c6c)))
+   sha256=e2872c5fc7f4f7dc0e989d20fd67c84cf5f15e62c2430fd1d8070aac8c08778f)))
 
 (exported_env
  (= CAML_LD_LIBRARY_PATH "\%{lib}%/stublibs"))
@@ -60,9 +55,9 @@
 (extra_sources
  (init-compiler.tar.gz
   (fetch
-   (url https://github.com/ocaml/ocaml/archive/4.14.1.tar.gz)
+   (url https://github.com/ocaml/ocaml/archive/4.14.2.tar.gz)
    (checksum
-    sha256=776006e6f0b9bcfb6d9d74381c588e587432ca85562fde93bb80472a5145b028)))
+    sha256=c2d706432f93ba85bd3383fa451d74543c32a4e84a1afaf3e8ace18f7f097b43)))
  (init-dune.tbz
   (fetch
    (url https://github.com/ocaml/dune/releases/download/3.9.3/dune-3.9.3.tbz)
