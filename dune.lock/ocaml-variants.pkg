@@ -1,4 +1,4 @@
-(version 5.2.0+flambda2)
+(version 5.2.0+ox)
 
 (install
  (run sh -exc "PATH=%{build}/init_deps/bin/:$PATH make install"))
@@ -18,15 +18,15 @@
   (run
    sh
    -exc
-   "cd dune-3.9.3; PATH=%{build}/init_deps/bin/:$PATH ocaml boot/bootstrap.ml -j %{jobs}")
+   "cd dune-3.20.2; PATH=%{build}/init_deps/bin/:$PATH ocaml boot/bootstrap.ml -j %{jobs}")
   (run
    sh
    -exc
-   "cd dune-3.9.3; PATH=%{build}/init_deps/bin/:$PATH ./_boot/dune.exe build dune.install --release --profile dune-bootstrap -j %{jobs}")
+   "cd dune-3.20.2; PATH=%{build}/init_deps/bin/:$PATH ./_boot/dune.exe build dune.install --release --profile dune-bootstrap -j %{jobs}")
   (run
    sh
    -exc
-   "cd dune-3.9.3; PATH=%{build}/init_deps/bin/:$PATH ./_boot/dune.exe install --root %{build}/dune-3.9.3 --prefix %{build}/init_deps/ dune")
+   "cd dune-3.20.2; PATH=%{build}/init_deps/bin/:$PATH ./_boot/dune.exe install --root %{build}/dune-3.20.2 --prefix %{build}/init_deps/ dune")
   (run
    sh
    -exc
@@ -34,20 +34,22 @@
   (run
    sh
    -exc
-   "cd menhir-20231231-d3d815e4f554da68b8c247241c8f8678926eecaa; PATH=%{build}/init_deps/bin/:$PATH %{build}/init_deps/bin/dune install --prefix %{build}/init_deps/ -p menhirLib -j %{jobs}")
+   "cd menhir-20231231-d3d815e4f554da68b8c247241c8f8678926eecaa; PATH=%{build}/init_deps/bin/:$PATH %{build}/init_deps/bin/dune install --prefix %{build}/init_deps/ -p menhirLib,menhir -j %{jobs}")
   (run sh -exc "autoconf || autoconf27")
   (run
    sh
    -exc
-   "PATH=%{build}/init_deps/bin/:$PATH ./configure --enable-runtime5 --enable-middle-end=flambda2 --enable-poll-insertion --disable-naked-pointers '--prefix=%{prefix}' '--with-dune=%{build}/init_deps/bin/dune'")
+   "PATH=%{build}/init_deps/bin/:$PATH ./configure --enable-middle-end=flambda2 --enable-runtime5 --enable-stack-checks --enable-poll-insertion --enable-multidomain --disable-warn-error '--prefix=%{prefix}' '--with-dune=%{build}/init_deps/bin/dune'")
   (run sh -exc "PATH=%{build}/init_deps/bin/:$PATH make -j%{jobs}")))
+
+(depends conf-autoconf conf-which)
 
 (source
  (fetch
   (url
-   https://github.com/ocaml-flambda/flambda-backend/archive/refs/tags/5.2.0minus-9.tar.gz)
+   https://github.com/oxcaml/oxcaml/archive/refs/tags/5.2.0minus-19-opam.tar.gz)
   (checksum
-   sha256=e2872c5fc7f4f7dc0e989d20fd67c84cf5f15e62c2430fd1d8070aac8c08778f)))
+   sha256=30c9030e82cc282058bece5759dcf5b208dd5f1423e9a2c013933d6226c344b6)))
 
 (exported_env
  (= CAML_LD_LIBRARY_PATH "\%{lib}%/stublibs"))
@@ -60,9 +62,10 @@
     sha256=c2d706432f93ba85bd3383fa451d74543c32a4e84a1afaf3e8ace18f7f097b43)))
  (init-dune.tbz
   (fetch
-   (url https://github.com/ocaml/dune/releases/download/3.9.3/dune-3.9.3.tbz)
+   (url
+    https://github.com/ocaml/dune/releases/download/3.20.2/dune-3.20.2.tbz)
    (checksum
-    sha256=96bf755da267fb46e4af2dda0db56d5863761589618089c429ff85e0f7f65783)))
+    sha256=b1a86b2d60bdb4a8b9bb6861bdf2f9f28a6e7cb5d833ce81afecceb9ef9ca549)))
  (init-menhir.tar.gz
   (fetch
    (url
