@@ -3,6 +3,5 @@
 (package
  (name hello-oxcaml)
  (depends
-  ocaml
   (ocaml-variants
-   (= 5.2.0+flambda2))))
+   (= 5.2.0+ox))))
